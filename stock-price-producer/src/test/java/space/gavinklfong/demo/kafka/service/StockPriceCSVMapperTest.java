@@ -1,0 +1,34 @@
+package space.gavinklfong.demo.kafka.service;
+
+import lombok.extern.slf4j.Slf4j;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
+import space.gavinklfong.demo.kafka.config.service.StockPriceCSVMapper;
+import space.gavinklfong.demo.kafka.dto.StockPrice;
+
+import java.io.IOException;
+import java.net.URISyntaxException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.List;
+import java.util.stream.Stream;
+
+@Slf4j
+class StockPriceCSVMapperTest {
+
+    @ParameterizedTest
+    @ValueSource(strings = {"data/IBM_no_time.csv", "data/GOOG_no_time.csv"})
+    void mapperTest(String file) throws URISyntaxException, IOException {
+        Path path = Paths.get(getClass().getClassLoader()
+                .getResource(file).toURI());
+
+        Stream<String> lines = Files.lines(path);
+        List<StockPrice> stockPrices = lines.skip(1)
+                .map(line -> line.split(","))
+                .map(StockPriceCSVMapper::mapTo)
+                .peek(stockPrice -> log.info(stockPrice.toString()))
+                .toList();
+    }
+}
