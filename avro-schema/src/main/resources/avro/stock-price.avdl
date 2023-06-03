@@ -1,0 +1,11 @@
+@namespace("space.gavinklfong.demo.kafka.schema")
+protocol AppProtocol {
+	record StockPrice {
+		local_timestamp_ms timestamp;
+		double open;
+		double high;
+		double low;
+		double close;
+		long volume;
+	}
+}

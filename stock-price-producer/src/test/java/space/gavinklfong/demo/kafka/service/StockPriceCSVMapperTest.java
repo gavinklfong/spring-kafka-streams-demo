@@ -5,7 +5,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import space.gavinklfong.demo.kafka.config.service.StockPriceCSVMapper;
-import space.gavinklfong.demo.kafka.dto.StockPrice;
+import space.gavinklfong.demo.kafka.schema.StockPrice;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -19,7 +19,7 @@ import java.util.stream.Stream;
 class StockPriceCSVMapperTest {
 
     @ParameterizedTest
-    @ValueSource(strings = {"data/IBM_no_time.csv", "data/GOOG_no_time.csv"})
+    @ValueSource(strings = {"data/IBM.csv", "data/GOOG.csv"})
     void mapperTest(String file) throws URISyntaxException, IOException {
         Path path = Paths.get(getClass().getClassLoader()
                 .getResource(file).toURI());

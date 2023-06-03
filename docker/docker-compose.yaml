@@ -8,11 +8,12 @@ services:
     ports:
       - 3030:3030
       - 9092:9092
+      - 8081:8081
 
-  kafka-ui:
-    image: provectuslabs/kafka-ui:latest
-    environment:
-      - DYNAMIC_CONFIG_ENABLED=true
-    ports:
-      - 8080:8080
+#  kafka-ui:
+#    image: provectuslabs/kafka-ui:latest
+#    environment:
+#      - DYNAMIC_CONFIG_ENABLED=true
+#    ports:
+#      - 8080:8080
 
