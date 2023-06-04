@@ -5,9 +5,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import space.gavinklfong.demo.kafka.config.service.StockPriceTask;
+import space.gavinklfong.demo.kafka.config.AppProperties;
+import space.gavinklfong.demo.kafka.service.StockPriceTask;
 
+import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
 import java.util.List;
+import java.util.Random;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -15,9 +19,16 @@ import java.util.concurrent.TimeUnit;
 @Slf4j
 @SpringBootApplication
 public class StockPriceProducerApp implements CommandLineRunner {
+    private Random rand = SecureRandom.getInstanceStrong();
 
     @Autowired
     private List<StockPriceTask> stockPriceTasks;
+
+    @Autowired
+    private AppProperties appProperties;
+
+    public StockPriceProducerApp() throws NoSuchAlgorithmException {
+    }
 
     public static void main(String[] args) {
         SpringApplication.run(StockPriceProducerApp.class, args);
@@ -25,11 +36,9 @@ public class StockPriceProducerApp implements CommandLineRunner {
 
     @Override
     public void run(String... args) {
-        log.info("Running executor service");
-//        ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
-//        executorService.scheduleAtFixedRate(ibmStockPriceTask, 1, 1, TimeUnit.SECONDS);
-        ScheduledExecutorService executorService = Executors.newScheduledThreadPool(4);
+        ScheduledExecutorService executorService = Executors.newScheduledThreadPool(5);
         stockPriceTasks.forEach(task ->
-                executorService.scheduleAtFixedRate(task, 1, 1, TimeUnit.SECONDS));
+                executorService.scheduleAtFixedRate(task,
+                        rand.nextInt(1001), appProperties.getPeriodMs(), TimeUnit.MILLISECONDS));
     }
 }

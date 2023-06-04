@@ -9,6 +9,19 @@ services:
       - 3030:3030
       - 9092:9092
       - 8081:8081
+    healthcheck:
+      test: nc -z localhost 9092 || exit -1
+      start_period: 15s
+      interval: 5s
+      timeout: 10s
+      retries: 10
+
+  stock-price-producer:
+    image: whalebig27/stock-price-producer:latest
+    depends_on:
+      kafka:
+        condition: service_healthy
+    network_mode: host
 
 #  kafka-ui:
 #    image: provectuslabs/kafka-ui:latest

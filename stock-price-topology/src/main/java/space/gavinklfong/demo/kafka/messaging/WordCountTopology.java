@@ -1,4 +1,4 @@
-package space.gavinklfong.demo.insurance.messaging;
+package space.gavinklfong.demo.kafka.messaging;
 
 import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.common.utils.Bytes;

@@ -1,0 +1,1 @@
+docker run whalebig27/stock-price-producer:latest

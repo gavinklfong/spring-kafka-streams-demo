@@ -1,15 +1,11 @@
-package space.gavinklfong.demo.kafka.config.service;
+package space.gavinklfong.demo.kafka.service;
 
-import com.github.javafaker.Stock;
-import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.core.KafkaTemplate;
-import org.springframework.stereotype.Component;
 import space.gavinklfong.demo.kafka.schema.StockPrice;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 
@@ -26,6 +22,7 @@ public class StockPriceTask implements Runnable {
         log.info("initialize StockPriceTask with file {}", file);
         ClassLoader classLoader = getClass().getClassLoader();
         InputStream inputStream = classLoader.getResourceAsStream(file);
+        assert inputStream != null;
         this.reader = new BufferedReader(new InputStreamReader(inputStream));
 
         this.stockTicker = stockTicker;
@@ -36,11 +33,19 @@ public class StockPriceTask implements Runnable {
     @Override
     public void run() {
         String line = reader.readLine();
-        log.info("Reading next record: {}", line);
-        if (isNull(line)) throw new RuntimeException("No more data");
+        log.debug("Reading next record: {}", line);
+        if (isNull(line)) {
+            reader.close();
+            throw new RuntimeException("No more data");
+        }
         String[] fields = line.split(",");
-        StockPrice stockPrice = StockPriceCSVMapper.mapTo(fields);
-        log.info("Sending stock price to topic: {}", stockPrice);
-        kafkaTemplate.send(STOCK_PRICE_TOPIC, stockTicker, stockPrice);
+
+        try {
+            StockPrice stockPrice = StockPriceCSVMapper.mapTo(fields);
+            log.info("Sending stock price [{}] to topic: {}", stockTicker, stockPrice);
+            kafkaTemplate.send(STOCK_PRICE_TOPIC, stockTicker, stockPrice);
+        } catch (Throwable t) {
+            log.error("Error occurred", t);
+        }
     }
 }

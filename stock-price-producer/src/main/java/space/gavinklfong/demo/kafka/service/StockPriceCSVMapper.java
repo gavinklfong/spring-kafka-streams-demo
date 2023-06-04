@@ -1,4 +1,4 @@
-package space.gavinklfong.demo.kafka.config.service;
+package space.gavinklfong.demo.kafka.service;
 
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;

@@ -1,10 +1,10 @@
-package space.gavinklfong.demo.insurance;
+package space.gavinklfong.demo.kafka;
 
 import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.streams.KafkaStreams;
 import org.apache.kafka.streams.StreamsConfig;
 import org.apache.kafka.streams.Topology;
-import space.gavinklfong.demo.insurance.messaging.WordCountTopology;
+import space.gavinklfong.demo.kafka.messaging.WordCountTopology;
 
 import java.util.Properties;
 

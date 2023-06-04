@@ -15,6 +15,15 @@ management:
         include: prometheus
 
 app:
+  period-ms: 1000
   tickers:
+    AMZN: data/AMZN.csv
+    APPL: data/APPL.csv
     IBM: data/IBM.csv
     GOOG: data/GOOG.csv
+    GOOGL: data/GOOGL.csv
+    META: data/META.csv
+    MSFT: data/MSFT.csv
+    NVDA: data/NVDA.csv
+    UNH: data/UNH.csv
+    XOM: data/XOM.csv

@@ -1,10 +1,8 @@
 package space.gavinklfong.demo.kafka.service;
 
 import lombok.extern.slf4j.Slf4j;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
-import space.gavinklfong.demo.kafka.config.service.StockPriceCSVMapper;
 import space.gavinklfong.demo.kafka.schema.StockPrice;
 
 import java.io.IOException;
