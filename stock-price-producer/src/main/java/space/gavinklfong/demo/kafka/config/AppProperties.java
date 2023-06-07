@@ -12,4 +12,6 @@ import java.util.Map;
 public class AppProperties {
     private Map<String, String> tickers;
     private int periodMs = 1000;
+    private int threadPoolSize = 4;
+    private String topic;
 }

@@ -12,7 +12,7 @@ public class AppConfig {
     @Bean
     public List<StockPriceTask> stockPriceTasks(AppProperties appProperties, KafkaTemplate kafkaTemplate) {
         return appProperties.getTickers().entrySet().stream()
-                .map(entry -> new StockPriceTask(entry.getKey(), entry.getValue(), kafkaTemplate))
+                .map(entry -> new StockPriceTask(entry.getKey(), entry.getValue(), kafkaTemplate, appProperties))
                 .toList();
     }
 }

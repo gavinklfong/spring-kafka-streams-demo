@@ -10,13 +10,10 @@ import org.springframework.kafka.config.TopicBuilder;
 @EnableKafka
 @Configuration
 public class KafkaConfig {
-    
-    @Autowired
-    private AppProperties appProperties;
 
     @Bean
     public NewTopic stockPriceTopic() {
-        return TopicBuilder.name(appProperties.getTopic()).build();
+        return TopicBuilder.name("stock-price-output").build();
     }
 
 }

@@ -1,0 +1,7 @@
+@namespace("space.gavinklfong.demo.kafka.schema")
+protocol AppProtocol {
+	record CountAndSum {
+		long count;
+		double sum;
+	}
+}

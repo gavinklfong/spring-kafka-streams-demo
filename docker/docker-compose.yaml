@@ -16,12 +16,12 @@ services:
       timeout: 10s
       retries: 10
 
-  stock-price-producer:
-    image: whalebig27/stock-price-producer:latest
-    depends_on:
-      kafka:
-        condition: service_healthy
-    network_mode: host
+#  stock-price-producer:
+#    image: whalebig27/stock-price-producer:latest
+#    depends_on:
+#      kafka:
+#        condition: service_healthy
+#    network_mode: host
 
 #  kafka-ui:
 #    image: provectuslabs/kafka-ui:latest

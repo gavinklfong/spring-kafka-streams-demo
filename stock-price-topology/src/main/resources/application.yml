@@ -1,13 +1,15 @@
 spring:
+  main:
+    web-application-type: none
   application:
-    name: insurance-claim-processor
+    name: stock-price-topology
   kafka:
     bootstrap-servers: localhost:9092
     producer:
-      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
-    consumer:
-      value-deserializer: org.apache.kafka.common.serialization.ByteArrayDeserializer
-      auto-offset-reset: earliest
+      key-serializer: io.confluent.kafka.serializers.KafkaAvroSerializer
+      value-serializer: io.confluent.kafka.serializers.KafkaAvroSerializer
+      properties:
+        schema.registry.url: http://localhost:8081
 management:
   endpoints:
     web:

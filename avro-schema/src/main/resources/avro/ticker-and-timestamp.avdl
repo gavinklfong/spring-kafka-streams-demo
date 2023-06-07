@@ -1,11 +1,7 @@
 @namespace("space.gavinklfong.demo.kafka.schema")
 protocol AppProtocol {
-	record StockPrice {
+	record TickerAndTimestamp {
+		string ticker;
 		timestamp_ms timestamp;
-		double open;
-		double high;
-		double low;
-		double close;
-		long volume;
 	}
 }

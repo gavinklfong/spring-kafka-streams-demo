@@ -7,6 +7,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import space.gavinklfong.demo.kafka.config.AppProperties;
 import space.gavinklfong.demo.kafka.service.StockPriceTask;
+import space.gavinklfong.demo.kafka.service.StockPriceTaskCloser;
 
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
@@ -19,6 +20,7 @@ import java.util.concurrent.TimeUnit;
 @Slf4j
 @SpringBootApplication
 public class StockPriceProducerApp implements CommandLineRunner {
+
     private Random rand = SecureRandom.getInstanceStrong();
 
     @Autowired
@@ -26,6 +28,9 @@ public class StockPriceProducerApp implements CommandLineRunner {
 
     @Autowired
     private AppProperties appProperties;
+
+    @Autowired
+    private StockPriceTaskCloser stockPriceTaskCloser;
 
     public StockPriceProducerApp() throws NoSuchAlgorithmException {
     }
@@ -36,9 +41,15 @@ public class StockPriceProducerApp implements CommandLineRunner {
 
     @Override
     public void run(String... args) {
-        ScheduledExecutorService executorService = Executors.newScheduledThreadPool(5);
+        ScheduledExecutorService executorService = Executors.newScheduledThreadPool(appProperties.getThreadPoolSize());
         stockPriceTasks.forEach(task ->
                 executorService.scheduleAtFixedRate(task,
-                        rand.nextInt(1001), appProperties.getPeriodMs(), TimeUnit.MILLISECONDS));
+                        getInitialDelay(), appProperties.getPeriodMs(), TimeUnit.MILLISECONDS));
+
+        Runtime.getRuntime().addShutdownHook(new Thread(stockPriceTaskCloser));
+    }
+
+    private long getInitialDelay() {
+        return rand.nextLong(1001) + 500;
     }
 }
