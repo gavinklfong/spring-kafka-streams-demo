@@ -34,7 +34,7 @@ public class StockPriceTopology {
     public static Topology build() {
         StreamsBuilder builder = new StreamsBuilder();
         KStream<String, StockPrice> source = builder.stream(INPUT_TOPIC);
-        source.peek((key, value) -> log.info("key: {}, value: {}", key, value));
+//        source.peek((key, value) -> log.info("key: {}, value: {}", key, value));
 
         KStream<TickerAndTimestamp, StockPrice> sourceInTickerAndTimestampInterval =
                 source.selectKey((key, value) -> new TickerAndTimestamp(key, convertTimestampByInterval(value.getTimestamp(), MINUTE_INTERVAL)));
@@ -52,10 +52,11 @@ public class StockPriceTopology {
                 },
                 Materialized.with(getTickerAndTimestampSerde(), getCountAndSumSerde()));
 
-//        KTable<TickerAndTimestamp, Double> averageKTable = countAndSumKTable.mapValues(value -> value.getSum() / value.getCount());
-//        averageKTable.toStream().to(OUTPUT_TOPIC);
-
-        countAndSumKTable.toStream().to(OUTPUT_TOPIC);
+        KTable<TickerAndTimestamp, Double> averageKTable = countAndSumKTable.mapValues(value -> value.getSum() / value.getCount(),
+                Materialized.with(getTickerAndTimestampSerde(), Serdes.Double()));
+        averageKTable.toStream()
+                .peek((key, value) -> log.info("key: {}, value: {}", key, value))
+                .to(OUTPUT_TOPIC);
 
         return builder.build();
     }
