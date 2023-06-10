@@ -3,7 +3,7 @@ package space.gavinklfong.demo.kafka.service;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
-import space.gavinklfong.demo.kafka.schema.StockPrice;
+import space.gavinklfong.demo.kafka.model.StockPrice;
 
 import java.io.IOException;
 import java.net.URISyntaxException;

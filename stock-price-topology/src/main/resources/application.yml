@@ -6,10 +6,22 @@ spring:
   kafka:
     bootstrap-servers: localhost:9092
     producer:
-      key-serializer: io.confluent.kafka.serializers.KafkaAvroSerializer
-      value-serializer: io.confluent.kafka.serializers.KafkaAvroSerializer
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
       properties:
-        schema.registry.url: http://localhost:8081
+        spring.json.trusted.packages: space.gavinklfong.demo.kafka.model
+    consumer:
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring.json.trusted.packages: space.gavinklfong.demo.kafka.model
+    streams:
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring.json.trusted.packages: space.gavinklfong.demo.kafka.model
+#      properties:
+#        schema.registry.url: http://localhost:8081
 management:
   endpoints:
     web:

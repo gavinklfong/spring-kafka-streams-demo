@@ -2,9 +2,11 @@ package space.gavinklfong.demo.kafka.service;
 
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.kafka.core.KafkaTemplate;
+import org.apache.kafka.clients.producer.KafkaProducer;
+import org.apache.kafka.clients.producer.ProducerRecord;
 import space.gavinklfong.demo.kafka.config.AppProperties;
-import space.gavinklfong.demo.kafka.schema.StockPrice;
+import space.gavinklfong.demo.kafka.model.StockPrice;
+//import space.gavinklfong.demo.kafka.schema.StockPrice;
 
 import java.io.BufferedReader;
 import java.io.InputStream;
@@ -16,10 +18,11 @@ import static java.util.Objects.isNull;
 public class StockPriceTask implements Runnable {
     private final String stockTicker;
     private final BufferedReader reader;
-    private final KafkaTemplate<String, StockPrice> kafkaTemplate;
+
+    private final KafkaProducer<String, StockPrice> kafkaProducer;
     private final String topic;
 
-    public StockPriceTask(String stockTicker, String file, KafkaTemplate<String, StockPrice> kafkaTemplate,
+    public StockPriceTask(String stockTicker, String file, KafkaProducer<String, StockPrice> kafkaProducer,
                           AppProperties appProperties) {
         log.info("initialize StockPriceTask with file {}", file);
         ClassLoader classLoader = getClass().getClassLoader();
@@ -28,7 +31,7 @@ public class StockPriceTask implements Runnable {
         this.reader = new BufferedReader(new InputStreamReader(inputStream));
 
         this.stockTicker = stockTicker;
-        this.kafkaTemplate = kafkaTemplate;
+        this.kafkaProducer = kafkaProducer;
         this.topic = appProperties.getTopic();
     }
 
@@ -46,7 +49,8 @@ public class StockPriceTask implements Runnable {
         try {
             StockPrice stockPrice = StockPriceCSVMapper.mapTo(fields);
             log.info("Sending stock price [{}] to topic: {}", stockTicker, stockPrice);
-            kafkaTemplate.send(topic, stockTicker, stockPrice);
+            ProducerRecord<String, StockPrice> producerRecord = new ProducerRecord<>(topic, stockTicker, stockPrice);
+            kafkaProducer.send(producerRecord).get();
         } catch (Throwable t) {
             log.error("Error occurred", t);
         }

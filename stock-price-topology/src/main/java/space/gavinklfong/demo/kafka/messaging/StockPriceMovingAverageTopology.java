@@ -2,29 +2,31 @@ package space.gavinklfong.demo.kafka.messaging;
 
 import io.confluent.kafka.serializers.AbstractKafkaSchemaSerDeConfig;
 import io.confluent.kafka.streams.serdes.avro.SpecificAvroSerde;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.common.serialization.Serdes;
-import org.apache.kafka.common.utils.Bytes;
 import org.apache.kafka.streams.StreamsBuilder;
 import org.apache.kafka.streams.Topology;
 import org.apache.kafka.streams.kstream.*;
-import org.apache.kafka.streams.state.KeyValueStore;
-import space.gavinklfong.demo.kafka.schema.CountAndSum;
-import space.gavinklfong.demo.kafka.schema.TickerAndTimestamp;
-import space.gavinklfong.demo.kafka.schema.StockPrice;
+import org.springframework.kafka.support.serializer.JsonDeserializer;
+import org.springframework.kafka.support.serializer.JsonSerde;
+import space.gavinklfong.demo.kafka.model.CountAndSum;
+import space.gavinklfong.demo.kafka.model.StockPrice;
+import space.gavinklfong.demo.kafka.model.TickerAndTimestamp;
+import space.gavinklfong.demo.kafka.util.StockPriceSerdes;
+//import space.gavinklfong.demo.kafka.schema.CountAndSum;
+//import space.gavinklfong.demo.kafka.schema.TickerAndTimestamp;
 
-import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
-import java.time.temporal.ChronoField;
 import java.time.temporal.ChronoUnit;
-import java.util.Arrays;
-import java.util.Locale;
 import java.util.Map;
 
 @Slf4j
-public class StockPriceTopology {
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
+public class StockPriceMovingAverageTopology {
 
     private static final int MINUTE_INTERVAL = 10;
     private static final String INPUT_TOPIC = "stock-price";
@@ -33,27 +35,29 @@ public class StockPriceTopology {
 
     public static Topology build() {
         StreamsBuilder builder = new StreamsBuilder();
-        KStream<String, StockPrice> source = builder.stream(INPUT_TOPIC);
+        KStream<String, StockPrice> source = builder.stream(INPUT_TOPIC, Consumed.with(Serdes.String(), StockPriceSerdes.stockPrice()));
 //        source.peek((key, value) -> log.info("key: {}, value: {}", key, value));
 
         KStream<TickerAndTimestamp, StockPrice> sourceInTickerAndTimestampInterval =
-                source.selectKey((key, value) -> new TickerAndTimestamp(key, convertTimestampByInterval(value.getTimestamp(), MINUTE_INTERVAL)));
+                source.selectKey((key, value) -> new TickerAndTimestamp(key, convertTimestampByInterval(value.getTimestamp(), MINUTE_INTERVAL)),
+                        Named.as("stock-price-timestamp-key-stream"));
 
         KGroupedStream<TickerAndTimestamp, StockPrice> sourceGroupedByTickerAndTimestampInterval = sourceInTickerAndTimestampInterval.groupByKey(
-                Grouped.with(getTickerAndTimestampSerde(), getStockPriceSerde())
+                Grouped.with("stock-ticker-group-by-timestamp-stream", StockPriceSerdes.tickerAndTimestamp(), StockPriceSerdes.stockPrice())
         );
 
         KTable<TickerAndTimestamp, CountAndSum> countAndSumKTable = sourceGroupedByTickerAndTimestampInterval.aggregate(() ->
                 new CountAndSum(0L, 0D),
-                (key, value, aggregate) -> {
-                    aggregate.setCount(aggregate.getCount() + 1);
-                    aggregate.setSum(aggregate.getSum() + value.getClose());
-                    return aggregate;
-                },
-                Materialized.with(getTickerAndTimestampSerde(), getCountAndSumSerde()));
+                (key, value, aggregate) -> (
+                   new CountAndSum(aggregate.getCount() + 1, aggregate.getSum() + value.getClose())
+                ),
+                Named.as("stock-ticker-time-interval-with-count-and-sum-table"),
+                Materialized.with(StockPriceSerdes.tickerAndTimestamp(), StockPriceSerdes.countAndSum()));
 
         KTable<TickerAndTimestamp, Double> averageKTable = countAndSumKTable.mapValues(value -> value.getSum() / value.getCount(),
-                Materialized.with(getTickerAndTimestampSerde(), Serdes.Double()));
+                Named.as("stock-ticker-time-interval-with-average"),
+                Materialized.with(StockPriceSerdes.tickerAndTimestamp(), Serdes.Double()));
+
         averageKTable.toStream()
                 .peek((key, value) -> log.info("key: {}, value: {}", key, value))
                 .to(OUTPUT_TOPIC);
@@ -71,27 +75,5 @@ public class StockPriceTopology {
         } else {
             return timestampWithInterval.withMinute(minuteWithInterval).toInstant();
         }
-    }
-
-    private static SpecificAvroSerde<StockPrice> getStockPriceSerde() {
-        SpecificAvroSerde<StockPrice> serde = new SpecificAvroSerde<>();
-        serde.configure(getSerdeConfig(), false);
-        return serde;
-    }
-
-    private static SpecificAvroSerde<TickerAndTimestamp> getTickerAndTimestampSerde() {
-        SpecificAvroSerde<TickerAndTimestamp> serde = new SpecificAvroSerde<>();
-        serde.configure(getSerdeConfig(), true);
-        return serde;
-    }
-
-    private static SpecificAvroSerde<CountAndSum> getCountAndSumSerde() {
-        SpecificAvroSerde<CountAndSum> serde = new SpecificAvroSerde<>();
-        serde.configure(getSerdeConfig(), false);
-        return serde;
-    }
-
-    private static Map<String, String> getSerdeConfig() {
-        return Map.of(AbstractKafkaSchemaSerDeConfig.SCHEMA_REGISTRY_URL_CONFIG, "http://localhost:8081");
     }
 }
