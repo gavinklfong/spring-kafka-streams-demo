@@ -4,9 +4,7 @@ import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import org.springframework.kafka.support.serializer.JsonDeserializer;
 import org.springframework.kafka.support.serializer.JsonSerde;
-import space.gavinklfong.demo.kafka.model.CountAndSum;
-import space.gavinklfong.demo.kafka.model.StockPrice;
-import space.gavinklfong.demo.kafka.model.TickerAndTimestamp;
+import space.gavinklfong.demo.kafka.model.*;
 
 import java.util.Map;
 
@@ -20,6 +18,12 @@ public class StockPriceSerdes {
     public static JsonSerde<StockPrice> stockPrice(boolean isKey) {
         JsonSerde<StockPrice> serde = new JsonSerde<>(StockPrice.class);
         serde.configure(getSerDeConfig(), isKey);
+        return serde;
+    }
+
+    public static JsonSerde<MedianStockPrice> medianStockPrice() {
+        JsonSerde<MedianStockPrice> serde = new JsonSerde<>(MedianStockPrice.class);
+        serde.configure(getSerDeConfig(), false);
         return serde;
     }
 
@@ -39,6 +43,16 @@ public class StockPriceSerdes {
 
     public static JsonSerde<CountAndSum> countAndSum(boolean isKey) {
         JsonSerde<CountAndSum> serde = new JsonSerde<>(CountAndSum.class);
+        serde.configure(getSerDeConfig(), isKey);
+        return serde;
+    }
+
+    public static JsonSerde<CountAndRelativeStrength> countAndRelativeStrength() {
+        return countAndRelativeStrength(false);
+    }
+
+    public static JsonSerde<CountAndRelativeStrength> countAndRelativeStrength(boolean isKey) {
+        JsonSerde<CountAndRelativeStrength> serde = new JsonSerde<>(CountAndRelativeStrength.class);
         serde.configure(getSerDeConfig(), isKey);
         return serde;
     }

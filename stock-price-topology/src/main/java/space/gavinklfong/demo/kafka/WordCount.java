@@ -4,7 +4,7 @@ import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.streams.KafkaStreams;
 import org.apache.kafka.streams.StreamsConfig;
 import org.apache.kafka.streams.Topology;
-import space.gavinklfong.demo.kafka.messaging.WordCountTopology;
+import space.gavinklfong.demo.kafka.topology.WordCountTopology;
 
 import java.util.Properties;
 

@@ -35,11 +35,13 @@ services:
       retries: 10
 
 #  stock-price-producer:
-#    image: whalebig27/stock-price-producer:latest
+#    image: whalebig27/stock-price-producer:simple
 #    depends_on:
 #      kafka:
 #        condition: service_healthy
 #    network_mode: host
+#    environment:
+#      - APP_PERIOD_MS=500
 
 #  kafka-ui:
 #    image: provectuslabs/kafka-ui:latest

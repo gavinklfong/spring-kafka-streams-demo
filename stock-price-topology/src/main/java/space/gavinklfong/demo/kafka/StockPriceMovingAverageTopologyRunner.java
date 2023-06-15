@@ -1,18 +1,11 @@
 package space.gavinklfong.demo.kafka;
 
-import io.confluent.kafka.streams.serdes.avro.SpecificAvroSerde;
-import io.confluent.kafka.serializers.AbstractKafkaSchemaSerDeConfig;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.streams.KafkaStreams;
 import org.apache.kafka.streams.StreamsConfig;
 import org.apache.kafka.streams.Topology;
-import org.springframework.kafka.support.serializer.JsonDeserializer;
-import org.springframework.kafka.support.serializer.JsonSerde;
-import space.gavinklfong.demo.kafka.messaging.StockPriceMovingAverageTopology;
-import space.gavinklfong.demo.kafka.model.StockPrice;
+import space.gavinklfong.demo.kafka.topology.StockPriceMovingAverageTopology;
 
-import java.util.Map;
 import java.util.Properties;
 
 @Slf4j

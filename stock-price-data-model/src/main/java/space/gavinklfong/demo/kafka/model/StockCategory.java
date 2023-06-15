@@ -1,4 +1,4 @@
-package space.gavinklfong.demo.kafka.messaging;
+package space.gavinklfong.demo.kafka.model;
 
 public enum StockCategory {
     RETAILER,

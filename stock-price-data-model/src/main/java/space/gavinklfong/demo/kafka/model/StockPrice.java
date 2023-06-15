@@ -9,9 +9,9 @@ import java.time.Instant;
 
 @AllArgsConstructor
 @NoArgsConstructor(force = true)
-@Builder
+@Builder(toBuilder = true)
 @Value
-public class StockPrice implements JSONSerdeCompatible {
+public class StockPrice {
     Instant timestamp;
     Double open;
     Double high;

@@ -18,15 +18,15 @@ management:
 app:
   topic: stock-price
   thread-pool-size: 4
-  period-ms: 1000
+  period-ms: 500
   tickers:
 #    AMZN: data/AMZN.csv
     APPL: data/APPL.csv
-    IBM: data/IBM.csv
+#    IBM: data/IBM.csv
 #    GOOG: data/GOOG.csv
 #    GOOGL: data/GOOGL.csv
 #    META: data/META.csv
-    MSFT: data/MSFT.csv
+#    MSFT: data/MSFT.csv
 #    NVDA: data/NVDA.csv
-    UNH: data/UNH.csv
-    XOM: data/XOM.csv
+#    UNH: data/UNH.csv
+#    XOM: data/XOM.csv

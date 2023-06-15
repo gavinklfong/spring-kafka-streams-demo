@@ -1,4 +1,4 @@
-package space.gavinklfong.demo.kafka.messaging;
+package space.gavinklfong.demo.kafka.topology;
 
 import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.common.utils.Bytes;

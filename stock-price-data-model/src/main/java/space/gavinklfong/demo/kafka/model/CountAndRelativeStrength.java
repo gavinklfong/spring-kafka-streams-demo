@@ -3,11 +3,14 @@ package space.gavinklfong.demo.kafka.model;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 import lombok.Value;
+import lombok.With;
 
+@With
 @NoArgsConstructor(force = true)
 @AllArgsConstructor
 @Value
-public class CountAndSum {
+public class CountAndRelativeStrength {
     Long count;
-    Double sum;
+    Double totalGain;
+    Double totalLoss;
 }

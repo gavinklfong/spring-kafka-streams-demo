@@ -21,3 +21,12 @@ docker exec docker_kafka_1 \
 docker exec docker_kafka_1 \
 /opt/landoop/kafka/bin/kafka-topics \
 --bootstrap-server localhost:9092 --describe
+
+
+docker exec docker-kafka-1 \
+/opt/landoop/kafka/bin/kafka-topics \
+--create \
+--bootstrap-server localhost:9092 \
+--replication-factor 1 \
+--partitions 1 \
+--topic straight-through-stock-price

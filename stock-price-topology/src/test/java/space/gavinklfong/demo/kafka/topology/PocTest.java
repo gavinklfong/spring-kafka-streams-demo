@@ -1,4 +1,4 @@
-package space.gavinklfong.demo.kafka.messaging;
+package space.gavinklfong.demo.kafka.topology;
 
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
