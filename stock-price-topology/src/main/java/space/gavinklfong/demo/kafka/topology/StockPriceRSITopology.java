@@ -7,17 +7,14 @@ import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.streams.StreamsBuilder;
 import org.apache.kafka.streams.Topology;
 import org.apache.kafka.streams.kstream.*;
-import org.apache.kafka.streams.processor.api.Processor;
-import org.apache.kafka.streams.processor.api.ProcessorSupplier;
 import org.apache.kafka.streams.state.KeyValueStore;
 import org.apache.kafka.streams.state.StoreBuilder;
 import org.apache.kafka.streams.state.Stores;
 import space.gavinklfong.demo.kafka.model.CountAndRelativeStrength;
-import space.gavinklfong.demo.kafka.model.CountAndSum;
 import space.gavinklfong.demo.kafka.model.StockPrice;
 import space.gavinklfong.demo.kafka.model.TickerAndTimestamp;
+import space.gavinklfong.demo.kafka.topology.processor.StockPriceDiffProcessor;
 import space.gavinklfong.demo.kafka.util.StockPriceSerdes;
-import space.gavinklfong.demo.kafka.topology.processor.StockPriceDiffProcessorSupplier;
 
 import java.time.Instant;
 import java.time.ZoneId;

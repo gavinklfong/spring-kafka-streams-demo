@@ -1,4 +1,4 @@
-package space.gavinklfong.demo.kafka.topology;
+package space.gavinklfong.demo.kafka.topology.processor;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.streams.KeyValue;
