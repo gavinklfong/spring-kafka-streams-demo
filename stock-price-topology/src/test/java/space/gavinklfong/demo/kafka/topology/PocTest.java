@@ -9,6 +9,12 @@ import java.util.stream.IntStream;
 class PocTest {
 
     @Test
+    void doRound() {
+        double d = 12.2526;
+        log.info("{}", Math.scalb(d, 2));
+    }
+
+    @Test
     void doTest2() {
         convertNumber(2);
     }

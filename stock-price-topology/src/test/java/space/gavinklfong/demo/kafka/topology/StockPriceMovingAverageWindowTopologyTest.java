@@ -7,15 +7,20 @@ import org.apache.kafka.streams.*;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import space.gavinklfong.demo.kafka.model.CountAndSum;
 import space.gavinklfong.demo.kafka.model.MedianStockPrice;
 import space.gavinklfong.demo.kafka.model.StockPrice;
+import space.gavinklfong.demo.kafka.topology.util.TestDataBuilder;
 import space.gavinklfong.demo.kafka.util.StockPriceSerdes;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.List;
 import java.util.Properties;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static space.gavinklfong.demo.kafka.topology.util.TestDataBuilder.buildAMAZExpectedMovingAverage;
+import static space.gavinklfong.demo.kafka.topology.util.TestDataBuilder.buildUNHExpectedMovingAverage;
 
 @Slf4j
 class StockPriceMovingAverageWindowTopologyTest {
@@ -31,8 +36,7 @@ class StockPriceMovingAverageWindowTopologyTest {
         Topology topology = StockPriceMovingAverageWindowTopology.build();
 
         Properties props = new Properties();
-        props.put(StreamsConfig.APPLICATION_ID_CONFIG, "stock-price-demo");
-//        props.put(StreamsConfig.DEFAULT_VALUE_SERDE_CLASS_CONFIG, Serdes.Double().getClass());
+        props.put(StreamsConfig.APPLICATION_ID_CONFIG, "stock-price-moving-average");
 
         testDriver = new TopologyTestDriver(topology, props);
 
@@ -47,25 +51,40 @@ class StockPriceMovingAverageWindowTopologyTest {
     }
 
     @Test
-    void doTest() {
-        Instant timestamp = Instant.parse("2023-04-01T09:00:00Z");
-        double stockPrice = 100D;
+    void verifyAMAZStockPricesMovingAverage() {
+        List<StockPrice> stockPrices = TestDataBuilder.buildAMAZSampleStockPrices();
+        List<KeyValue<String, Double>> expectedOutputs = buildAMAZExpectedMovingAverage();
 
-        do {
-            inputTopic.pipeInput("APPL", stockPrice(timestamp, stockPrice));
-            timestamp = timestamp.plus(1, ChronoUnit.MINUTES);
-            stockPrice--;
-        } while (timestamp.isBefore(Instant.parse("2023-04-01T09:30:00Z")));
+        stockPrices.forEach(price -> inputTopic.pipeInput("AMAZ", price));
 
+        List<KeyValue<String, Double>> output = outputTopic.readKeyValuesToList();
+        List<KeyValue<String, Double>> amazMovingAverages = output.stream().filter(entry -> "AMAZ".equals(entry.key)).toList();
+        List<KeyValue<String, Double>> unhMovingAverages = output.stream().filter(entry -> "UNH".equals(entry.key)).toList();
+
+
+        assertThat(amazMovingAverages).isEqualTo(expectedOutputs);
 
 //        log.info("output: {}", outputTopic.readValuesToList());
 //        assertThat(outputTopic.readKeyValue()).isEqualTo(new KeyValue<>("APPL", medianStockPrice));
     }
 
-    private StockPrice stockPrice(Instant timestamp, double closePrice) {
-        return StockPrice.builder()
-                .timestamp(timestamp)
-                .close(closePrice).high(999D).low(111D).open(0D).volume(888L)
-                .build();
+    @Test
+    void doTest() {
+        List<KeyValue<String, StockPrice>> stockPrices = TestDataBuilder.buildSampleStockPrices();
+        List<KeyValue<String, Double>> amazExpectedOutputs = buildAMAZExpectedMovingAverage();
+        List<KeyValue<String, Double>> unhExpectedOutputs = buildUNHExpectedMovingAverage();
+
+        stockPrices.forEach(stockPrice -> {
+            log.info("{}", stockPrice);
+            inputTopic.pipeInput(stockPrice.key, stockPrice.value);
+        });
+
+        List<KeyValue<String, Double>> output = outputTopic.readKeyValuesToList();
+        List<KeyValue<String, Double>> amazMovingAverages = output.stream().filter(entry -> "AMAZ".equals(entry.key)).toList();
+        List<KeyValue<String, Double>> unhMovingAverages = output.stream().filter(entry -> "UNH".equals(entry.key)).toList();
+
+        assertThat(amazMovingAverages).isEqualTo(amazExpectedOutputs);
+        assertThat(unhMovingAverages).isEqualTo(unhExpectedOutputs);
     }
+
 }

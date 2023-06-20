@@ -12,6 +12,9 @@ import space.gavinklfong.demo.kafka.model.MedianStockPrice;
 import space.gavinklfong.demo.kafka.model.StockPrice;
 import space.gavinklfong.demo.kafka.util.StockPriceSerdes;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+
 @Component
 @Slf4j
 public class StockPriceDemoTopologyComponent {
@@ -31,7 +34,8 @@ public class StockPriceDemoTopologyComponent {
     private MedianStockPrice mapToMedianStockPrice(StockPrice stockPrice) {
         return MedianStockPrice.builder()
                 .timestamp(stockPrice.getTimestamp())
-                .median((stockPrice.getHigh() - stockPrice.getLow()) / 2)
+                .median((BigDecimal.valueOf(stockPrice.getHigh()).min(BigDecimal.valueOf(stockPrice.getLow())))
+                        .divide(BigDecimal.valueOf(2), RoundingMode.HALF_UP))
                 .volume(stockPrice.getVolume())
                 .build();
     }

@@ -4,10 +4,12 @@ import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 import lombok.Value;
 
+import java.math.BigDecimal;
+
 @NoArgsConstructor(force = true)
 @AllArgsConstructor
 @Value
 public class CountAndSum {
     Long count;
-    Double sum;
+    BigDecimal sum;
 }

@@ -5,6 +5,7 @@ import lombok.Builder;
 import lombok.NoArgsConstructor;
 import lombok.Value;
 
+import java.math.BigDecimal;
 import java.time.Instant;
 
 @Builder
@@ -13,6 +14,6 @@ import java.time.Instant;
 @Value
 public class MedianStockPrice {
     Instant timestamp;
-    Double median;
+    BigDecimal median;
     Long volume;
 }

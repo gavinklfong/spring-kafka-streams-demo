@@ -14,6 +14,8 @@ import space.gavinklfong.demo.kafka.util.StockPriceSerdes;
 //import space.gavinklfong.demo.kafka.schema.CountAndSum;
 //import space.gavinklfong.demo.kafka.schema.TickerAndTimestamp;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -42,14 +44,15 @@ public class StockPriceMovingAverageTopology {
         );
 
         KTable<TickerAndTimestamp, CountAndSum> countAndSumKTable = sourceGroupedByTickerAndTimestampInterval.aggregate(() ->
-                new CountAndSum(0L, 0D),
+                new CountAndSum(0L, BigDecimal.ZERO),
                 (key, value, aggregate) -> (
-                   new CountAndSum(aggregate.getCount() + 1, aggregate.getSum() + value.getClose())
+                   new CountAndSum(aggregate.getCount() + 1, aggregate.getSum().add(BigDecimal.valueOf(value.getClose())))
                 ),
                 Named.as("stock-ticker-time-interval-with-count-and-sum-table"),
                 Materialized.with(StockPriceSerdes.tickerAndTimestamp(), StockPriceSerdes.countAndSum()));
 
-        KTable<TickerAndTimestamp, Double> averageKTable = countAndSumKTable.mapValues(value -> value.getSum() / value.getCount(),
+        KTable<TickerAndTimestamp, Double> averageKTable = countAndSumKTable.mapValues(value -> value.getSum()
+                        .divide(BigDecimal.valueOf(value.getCount()), RoundingMode.HALF_UP).doubleValue(),
                 Named.as("stock-ticker-time-interval-with-average"),
                 Materialized.with(StockPriceSerdes.tickerAndTimestamp(), Serdes.Double()));
 

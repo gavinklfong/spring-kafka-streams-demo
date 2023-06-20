@@ -46,4 +46,9 @@ public class KafkaConfig {
     public NewTopic stockPriceRSIOutputTopic() {
         return TopicBuilder.name("stock-price-10m-rsi").build();
     }
+
+    @Bean
+    public NewTopic countByTickerOutputTopic() {
+        return TopicBuilder.name("count-by-ticker").build();
+    }
 }

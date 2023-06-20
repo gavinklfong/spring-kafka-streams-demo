@@ -6,6 +6,7 @@ import org.springframework.kafka.support.serializer.JsonDeserializer;
 import org.springframework.kafka.support.serializer.JsonSerde;
 import space.gavinklfong.demo.kafka.model.*;
 
+import java.math.BigDecimal;
 import java.util.Map;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
