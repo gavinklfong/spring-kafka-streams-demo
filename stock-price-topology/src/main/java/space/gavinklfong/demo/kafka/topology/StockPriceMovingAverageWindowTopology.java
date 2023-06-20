@@ -29,52 +29,36 @@ import static org.apache.kafka.streams.kstream.Suppressed.BufferConfig.unbounded
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class StockPriceMovingAverageWindowTopology {
 
-    private static final int MINUTE_INTERVAL = 10;
     private static final String INPUT_TOPIC = "stock-price";
-
     private static final String OUTPUT_TOPIC = "stock-price-moving-average";
+    private static final SlidingWindows TIME_WINDOWS = SlidingWindows.ofTimeDifferenceWithNoGrace(Duration.ofMinutes(15));
 
     public static Topology build() {
         StreamsBuilder builder = new StreamsBuilder();
 
-        TimeWindows timeWindows = TimeWindows.ofSizeWithNoGrace(Duration.ofMinutes(15)).advanceBy(Duration.ofMinutes(1));
-
         builder.stream(INPUT_TOPIC,
                 Consumed.with(Serdes.String(), StockPriceSerdes.stockPrice()).withTimestampExtractor(new StockPriceTimestampExtractor()))
-                .peek((key, value) -> log.info("0. input() - key: {}, value: {}", key, value))
                 .groupByKey(Grouped.with("stock-ticker-group-by-timestamp-stream", Serdes.String(), StockPriceSerdes.stockPrice()))
-//                .windowedBy(TimeWindows.ofSizeWithNoGrace(Duration.ofMinutes(3)))
-                .windowedBy(SlidingWindows.ofTimeDifferenceWithNoGrace(Duration.ofMinutes(15)))
-//                .windowedBy(timeWindows)
+                .windowedBy(TIME_WINDOWS)
                 .aggregate(() ->
                         new CountAndSum(0L, BigDecimal.ZERO),
-                        (key, value, aggregate) -> {
-//                            log.info("1. aggregate() - key: {}, value: {}, aggregate: {}", key, value, aggregate);
-                            return new CountAndSum(aggregate.getCount() + 1, aggregate.getSum().add(BigDecimal.valueOf(value.getClose())));
-                        },
+                        (key, value, aggregate) -> new CountAndSum(aggregate.getCount() + 1, aggregate.getSum().add(BigDecimal.valueOf(value.getClose()))),
                         Named.as("stock-ticker-time-interval-with-count-and-sum-table"),
                         Materialized.with(Serdes.String(), StockPriceSerdes.countAndSum()))
-//                .toStream()
-                .mapValues((key, value) -> {
-//                        log.info("2. mapValues() - time range: [{} - {}], value: {}", key.window().startTime(), key.window().endTime(), value);
-                        return value.getSum()
+                .mapValues((key, value) -> value.getSum()
                                 .divide(BigDecimal.valueOf(value.getCount()), 2, RoundingMode.HALF_UP)
-                                .doubleValue();
-                    },
+                                .doubleValue(),
                         Named.as("stock-ticker-time-interval-with-average"),
                         Materialized.with(WindowedSerdes.timeWindowedSerdeFrom(
-                                String.class, timeWindows.size()),
+                                String.class, TIME_WINDOWS.timeDifferenceMs()),
                                 Serdes.Double())
                 )
                 .suppress(Suppressed.untilWindowCloses(unbounded()).withName("average-time-window-suppressed"))
-//                .suppress(Suppressed.untilTimeLimit(Duration.ofMinutes(15), unbounded()).withName("average-time-window-suppressed"))
                 .toStream()
                 .filter((key, value) -> key.window().start() % 1000 == 0)
-                .peek((key, value) -> log.info("3. output: time range: [{} - {}], value: {}", key.window().startTime(), key.window().endTime(), value))
                 .map((key, value) -> KeyValue.pair(key.key(), value))
-//                .peek((key, value) -> log.info("3. output: key: {}, value: {}", key, value))
-//                .to(OUTPUT_TOPIC, Produced.with(Serdes.String(), StockPriceSerdes.countAndSum()));
                 .to(OUTPUT_TOPIC, Produced.with(Serdes.String(), Serdes.Double()));
+
         return builder.build();
     }
 }
